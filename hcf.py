@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 import re
 import argparse
 
@@ -18,8 +17,6 @@ def parse_csv( f, delim ):
     col_key, col_data = headings.strip().split( delim )
 
     for line in f:
-        print "+1", regex_1.match(line)
-        print "+2", regex_2.match(line)
         if regex_1.match(line) or not regex_2.match(line): 
             ''' 
             First column of each line is treated as key
@@ -29,12 +26,10 @@ def parse_csv( f, delim ):
                 host = Host()
                 setattr( host, col_data, host_data ) 
                 hosts[ host_key.upper() ] = host 
-                print "-", host_key.upper(), host
             else:
                 host_tmp = hosts[ host_key.upper() ]
                 setattr( host_tmp, col_data, host_data )
                 hosts[ host_key.upper() ] = host_tmp
-                print "-", host_key.upper(), host_tmp
 
 def main():
     parser = argparse.ArgumentParser(description='[i] Process CSV and convert each entry into Nagios hosts/hostgroups file.')
@@ -56,12 +51,20 @@ def main():
 
         with open( args.outfile, 'wb') as outfile:
             for host in sorted( hosts.keys() ):
-                print "---", hosts[ host ].__dict__.values()
                 if len( hosts[ host ].__dict__.values() ) > 1:
+                    """
+                    If merge is possible, export only both cell.
+                    val1 will be Application name
+                    val2 will be package name
+                    """
                     val2, val1 = hosts[ host ].__dict__.values()
                     print val1, host, val2
                     outfile.writelines("%s;%s;%s\n"%( val1, host , val2 ))
                 else:
+                    """
+                    If merge isn't possible, export only one cell.
+                    val1 will be Application name
+                    """
                     val1 = hosts[ host ].__dict__.values()[0]
                     print val1, host
                     outfile.writelines("%s;%s\n"%( val1, host ))
