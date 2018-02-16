@@ -5,10 +5,12 @@ import re
 import argparse
 
 hosts = {}
-comment_re = re.compile(r'\w+ \w+$') 
-regex_0 = re.compile(r'\w+\S+\w+$') 
+regex_0 = re.compile(r'\w+\S+\w+$',re.IGNORECASE) 
+'''
 regex_1 = re.compile(r'(\w+\d+\w+\S+\s)+|\w+ \w+$') 
-regex_2 = re.compile(r'-{1,}') 
+'''
+regex_1 = re.compile(r'(\w+\d+( |: )\w.*))+',re.IGNORECASE) 
+regex_2 = re.compile(r'^\s*$|={1,}|-{1,}|(\w+\d+)|(\w+(\s|\W))',re.IGNORECASE) 
 class Host: pass
 
 def parse_csv( f, delim ):
@@ -19,21 +21,21 @@ def parse_csv( f, delim ):
         print "+0", regex_0.match(line)
         print "+1", regex_1.match(line)
         print "+2", regex_2.match(line)
-        if regex_0.match(line) or regex_1.match(line) or not regex_2.match(line): 
+        if regex_1.match(line) and not regex_2.match(line): 
             ''' 
             First column of each line is treated as key
             '''
             host_key, host_data = line.strip().split( delim )
-            if host_key not in hosts.keys():
+            if host_key.upper() not in hosts.keys():
                 host = Host()
                 setattr( host, col_data, host_data ) 
-                hosts[ host_key ] = host 
-                print "-", host_key, host
+                hosts[ host_key.upper() ] = host 
+                print "-", host_key.upper(), host
             else:
-                host_tmp = hosts[ host_key ]
+                host_tmp = hosts[ host_key.upper() ]
                 setattr( host_tmp, col_data, host_data )
-                hosts[ host_key ] = host_tmp
-                print "-", host_key, host_tmp
+                hosts[ host_key.upper() ] = host_tmp
+                print "-", host_key.upper(), host_tmp
 
 def main():
     parser = argparse.ArgumentParser(description='[i] Process CSV and convert each entry into Nagios hosts/hostgroups file.')
