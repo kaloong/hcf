@@ -2,24 +2,21 @@
 
 
 import re
+import argparse
 
-csv_file_1 = open( "test.csv",'r')
-csv_file_2 = open( "test2.csv",'r')
-delim = " "
 hosts = {}
-comment_re = re.compile(r'(\w+ ){3,}|\W{2,}', re.VERBOSE) 
+comment_re = re.compile(r'\w+ \w+$') 
 class Host: pass
 
-def parse_csv( f ):
+def parse_csv( f, delim ):
     headings = f.readline()
     col_key, col_data = headings.strip().split( delim )
 
     for line in f:
-        if not comment_re.match(line): 
+        if comment_re.match(line): 
             ''' 
             First column of each line is treated as key
             '''
-            print line
             host_key, host_data = line.strip().split( delim )
             if host_key not in hosts.keys():
                 host = Host()
@@ -30,10 +27,31 @@ def parse_csv( f ):
                 setattr( host_tmp, col_data, host_data )
                 hosts[ host_key ] = host_tmp
 
-parse_csv(csv_file_1)
-parse_csv(csv_file_2)
+def main():
+    parser = argparse.ArgumentParser(description='[i] Process CSV and convert each entry into Nagios hosts/hostgroups file.')
+    parser.add_argument('-c1', "--csv1", help='[i] Specify CSV file 1 to be merged.')
+    parser.add_argument('-c2', "--csv2", help='[i] Specify CSV file 2 to be merged.')
+    parser.add_argument('-o', "--outfile", default="output.csv", help='[i] Specify output directory for generated files.')
+    parser.add_argument('-f', "--delimiter", default=" ", help='[i] Specify delimiter to be used.')
+    args = parser.parse_args()
+    if args.csv1 and args.csv2:
+        ''' Read in first file '''
+        with open( args.csv1, 'r' ) as infile:
+            parse_csv(infile, args.delimiter )
 
-for host in sorted( hosts.keys() ):
-    pkg, app = hosts[ host ].__dict__.values()
-    print host , pkg, app
+        ''' Read in second file '''
+        with open( args.csv2, 'r' ) as infile:
+            parse_csv(infile, args.delimiter )
 
+        print("******** Export file *********\n")
+
+        with open( args.outfile, 'wb') as outfile:
+            for host in sorted( hosts.keys() ):
+                pkg, app = hosts[ host ].__dict__.values()
+                print app, host , pkg
+                outfile.writelines("%s %s %s\n"%(app, host , pkg))
+
+    print("\n****** Export completed ******")
+
+if __name__ == '__main__':
+    main()
