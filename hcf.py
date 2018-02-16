@@ -5,11 +5,11 @@ import re
 import argparse
 
 hosts = {}
-regex_0 = re.compile(r'\w+\S+\w+$',re.IGNORECASE) 
 '''
+regex_0 = re.compile(r'\w+\S+\w+$',re.IGNORECASE) 
 regex_1 = re.compile(r'(\w+\d+\w+\S+\s)+|\w+ \w+$') 
 '''
-regex_1 = re.compile(r'(\w+\d+( |: )\w.*))+',re.IGNORECASE) 
+regex_1 = re.compile(r'(\w+\d+( |: )(\w.*))+',re.IGNORECASE) 
 regex_2 = re.compile(r'^\s*$|={1,}|-{1,}|(\w+\d+)|(\w+(\s|\W))',re.IGNORECASE) 
 class Host: pass
 
@@ -18,10 +18,9 @@ def parse_csv( f, delim ):
     col_key, col_data = headings.strip().split( delim )
 
     for line in f:
-        print "+0", regex_0.match(line)
         print "+1", regex_1.match(line)
         print "+2", regex_2.match(line)
-        if regex_1.match(line) and not regex_2.match(line): 
+        if regex_1.match(line) or not regex_2.match(line): 
             ''' 
             First column of each line is treated as key
             '''
@@ -46,12 +45,12 @@ def main():
     args = parser.parse_args()
     if args.csv1 and args.csv2:
         ''' Read in first file '''
-        with open( args.csv1, 'r' ) as infile:
-            parse_csv(infile, args.delimiter )
+        with open( args.csv1, 'r' ) as infile1:
+            parse_csv(infile1, args.delimiter )
 
         ''' Read in second file '''
-        with open( args.csv2, 'r' ) as infile:
-            parse_csv(infile, args.delimiter )
+        with open( args.csv2, 'r' ) as infile2:
+            parse_csv(infile2, args.delimiter )
 
         print("******** Export file *********\n")
 
@@ -61,11 +60,11 @@ def main():
                 if len( hosts[ host ].__dict__.values() ) > 1:
                     val2, val1 = hosts[ host ].__dict__.values()
                     print val1, host, val2
-                    outfile.writelines("%s\t%s\t%s\n"%( val1, host , val2 ))
+                    outfile.writelines("%s;%s;%s\n"%( val1, host , val2 ))
                 else:
                     val1 = hosts[ host ].__dict__.values()[0]
                     print val1, host
-                    outfile.writelines("%s\t%s\n"%( val1, host ))
+                    outfile.writelines("%s;%s\n"%( val1, host ))
 
     print("\n****** Export completed ******")
 
