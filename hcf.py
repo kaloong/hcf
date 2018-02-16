@@ -58,9 +58,14 @@ def main():
         with open( args.outfile, 'wb') as outfile:
             for host in sorted( hosts.keys() ):
                 print "---", hosts[ host ].__dict__.values()
-                pkg, app = hosts[ host ].__dict__.values()
-                print app, host , pkg
-                outfile.writelines("%s %s %s\n"%(app, host , pkg))
+                if len( hosts[ host ].__dict__.values() ) > 1:
+                    val2, val1 = hosts[ host ].__dict__.values()
+                    print val1, host, val2
+                    outfile.writelines("%s\t%s\t%s\n"%( val1, host , val2 ))
+                else:
+                    val1 = hosts[ host ].__dict__.values()[0]
+                    print val1, host
+                    outfile.writelines("%s\t%s\n"%( val1, host ))
 
     print("\n****** Export completed ******")
 
