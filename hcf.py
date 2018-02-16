@@ -6,6 +6,9 @@ import argparse
 
 hosts = {}
 comment_re = re.compile(r'\w+ \w+$') 
+regex_0 = re.compile(r'\w+\S+\w+$') 
+regex_1 = re.compile(r'(\w+\d+\w+\S+\s)+|\w+ \w+$') 
+regex_2 = re.compile(r'-{1,}') 
 class Host: pass
 
 def parse_csv( f, delim ):
@@ -13,7 +16,10 @@ def parse_csv( f, delim ):
     col_key, col_data = headings.strip().split( delim )
 
     for line in f:
-        if comment_re.match(line): 
+        print "+0", regex_0.match(line)
+        print "+1", regex_1.match(line)
+        print "+2", regex_2.match(line)
+        if regex_0.match(line) or regex_1.match(line) or not regex_2.match(line): 
             ''' 
             First column of each line is treated as key
             '''
@@ -22,10 +28,12 @@ def parse_csv( f, delim ):
                 host = Host()
                 setattr( host, col_data, host_data ) 
                 hosts[ host_key ] = host 
+                print "-", host_key, host
             else:
                 host_tmp = hosts[ host_key ]
                 setattr( host_tmp, col_data, host_data )
                 hosts[ host_key ] = host_tmp
+                print "-", host_key, host_tmp
 
 def main():
     parser = argparse.ArgumentParser(description='[i] Process CSV and convert each entry into Nagios hosts/hostgroups file.')
@@ -47,6 +55,7 @@ def main():
 
         with open( args.outfile, 'wb') as outfile:
             for host in sorted( hosts.keys() ):
+                print "---", hosts[ host ].__dict__.values()
                 pkg, app = hosts[ host ].__dict__.values()
                 print app, host , pkg
                 outfile.writelines("%s %s %s\n"%(app, host , pkg))

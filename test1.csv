@@ -1,0 +1,8 @@
+hostname: pkgname
+host1: pkg-0_1.x
+host2: pkg_0-2.x
+-----------
+-----
+host3: pkg-b3-1.xy
+host4: pkg-b4-1.xy
+host5: pkg-b5-1.xy
