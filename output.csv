@@ -1,0 +1,5 @@
+HOST1;app2;pkg-0_1.x;username12;
+HOST2;app1;pkg_0-2.x;username12;
+HOST3;app2;pkg-b3-1.xy;username3;
+HOST4;app2;pkg-b4-1.xy;username45;
+HOST5;app5;pkg-b5-1.xy;username45;

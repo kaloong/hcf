@@ -33,43 +33,20 @@ def parse_csv( f, delim ):
 
 def main():
     parser = argparse.ArgumentParser(description='[i] Process CSV and convert each entry into Nagios hosts/hostgroups file.')
-    parser.add_argument('-c1', "--csv1", help='[i] Specify CSV file 1 to be merged.')
-    parser.add_argument('-c2', "--csv2", help='[i] Specify CSV file 2 to be merged.')
+    parser.add_argument('-l', "--csvlist", type=str, nargs='+', help='[i] Specify CSV file list to be merged.')
     parser.add_argument('-o', "--outfile", default="output.csv", help='[i] Specify output directory for generated files.')
-    parser.add_argument('-f', "--delimiter", default=" ", help='[i] Specify delimiter to be used.')
+    parser.add_argument('-f', "--delimiter", default=": ", help='[i] Specify delimiter to be used.')
     args = parser.parse_args()
-    if args.csv1 and args.csv2:
-        ''' Read in first file '''
-        with open( args.csv1, 'r' ) as infile1:
-            parse_csv(infile1, args.delimiter )
-
-        ''' Read in second file '''
-        with open( args.csv2, 'r' ) as infile2:
-            parse_csv(infile2, args.delimiter )
-
-        print("******** Export file *********\n")
-
+    if args.csvlist:
+        for csv in args.csvlist:
+            with open( csv, 'r' ) as infile:
+                parse_csv( infile, args.delimiter)
         with open( args.outfile, 'wb') as outfile:
-            for host in sorted( hosts.keys() ):
-                if len( hosts[ host ].__dict__.values() ) > 1:
-                    """
-                    If merge is possible, export only both cell.
-                    val1 will be Application name
-                    val2 will be package name
-                    """
-                    val2, val1 = hosts[ host ].__dict__.values()
-                    print val1, host, val2
-                    outfile.writelines("%s;%s;%s\n"%( val1, host , val2 ))
-                else:
-                    """
-                    If merge isn't possible, export only one cell.
-                    val1 will be Application name
-                    """
-                    val1 = hosts[ host ].__dict__.values()[0]
-                    print val1, host
-                    outfile.writelines("%s;%s\n"%( val1, host ))
-
-    print("\n****** Export completed ******")
+            for host in sorted(hosts.keys()):
+                outfile.write( host+ ";" )
+                for detail in sorted( hosts[ host ].__dict__) :
+                    outfile.write( hosts[ host ].__dict__[ detail ] + ";" ) 
+                outfile.write("\n") 
 
 if __name__ == '__main__':
     main()
